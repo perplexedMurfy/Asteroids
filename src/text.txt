@@ -1,0 +1,99 @@
+#include <SDL2/SDL.h>
+#include "components.hpp"
+
+SDL_Point num_0[] = {{-3, 5}, {3, 5}, {3, -5}, {-3, -5}, {-3, 5}, {3, -5}};
+SDL_Point num_1[] = {{-3, -1}, {0, -5}, {0, 5}, {-3, 5}, {3, 5}};
+SDL_Point num_2[] = {{-3, -5}, {3, -5}, {3, 0}, {-3, 0}, {-3, 5}, {3, 5}};
+SDL_Point num_3[] = {{-3, -5}, {3, -5}, {3, 0}, {-3, 0}, {3, 0}, {3, 5}, {-3, 5}};
+SDL_Point num_4[] = {{-3, -5}, {-3, 0}, {3, 0}, {3, -5}, {3, 5}};
+SDL_Point num_5[] = {{3, -5}, {-3, -5}, {-3, 0}, {3, 0}, {3, 5}, {-3, 5}};
+SDL_Point num_6[] = {{-3, -5}, {-3, 5}, {3, 5}, {3, 0}, {-3, 0}};
+SDL_Point num_7[] = {{-3, -5}, {3, -5}, {3, 5}};
+SDL_Point num_8[] = {{-3, -5}, {3, -5}, {3, 5}, {-3, 5}, {-3, -5}, {-3, 0}, {3, 0}};
+SDL_Point num_9[] = {{3, 5}, {3, -5}, {-3, -5}, {-3, 0}, {3, 0}};
+
+SDL_Point let_A[] = {{0, -5}, {-3, 5}, {-2, 2}, {2, 2}, {0, -5}, {3, 5}};
+SDL_Point let_B[] = {{-3, -5}, {-3, 5}, {3, 3}, {-1, 0}, {3,- 3}, {-3, -5}};
+SDL_Point let_C[] = {{3, -5}, {-3, -5}, {-3, 5}, {3, 5}};
+SDL_Point let_D[] = {{-3, -5}, {3, -3}, {3, 3}, {-3, 5}, {-3, -5}};
+SDL_Point let_E[] = {{3, -5}, {-3, -5}, {-3, 0}, {1, 0}, {-3, 0}, {-3, 5}, {3, 5}};
+SDL_Point let_F[] = {{3, -5}, {-3, -5}, {-3, -2}, {1, -2}, {-3, -2}, {-3, 5}};
+SDL_Point let_G[] = {{3, -2}, {3, -5}, {-3, -5}, {-3, 5}, {0, 5}, {1, 3}, {1, 1}, {0, 1}, {3, 1}, {3, 4}};
+SDL_Point let_H[] = {{-3, -5}, {-3, 5}, {-3, 0}, {3, 0}, {3, -5}, {3, 5}};
+SDL_Point let_I[] = {{-3, -5}, {3, -5}, {0, -5}, {0, 5}, {-3, 5}, {3, 5}};
+SDL_Point let_J[] = {{-3, -5}, {3, -5}, {0, -5}, {0, 2}, {-1, 4}, {-3, 5}};
+SDL_Point let_K[] = {{-3, -5}, {-3, 0}, {3, 5}, {-3, 0}, {3, -5}, {-3, 0}, {-3, 5}};
+SDL_Point let_L[] = {{-3, -5}, {-3, 5}, {3, 5}};
+SDL_Point let_M[] = {{-3, 5}, {-3, -5}, {0, -1}, {3, -5}, {3, 5}};
+SDL_Point let_N[] = {{-3, 5}, {-3, -5}, {3, 5}, {3, -5}};
+SDL_Point let_O[] = {{-3, 5}, {3, 5}, {3, -5}, {-3, -5}, {-3, 5}}; 
+SDL_Point let_P[] = {{-3, 5}, {-3, -5}, {3, -5}, {3, -1}, {-3, -1}};
+SDL_Point let_Q[] = {{3, 5}, {0, 2}, {2, 4}, {3, 2}, {3, -5}, {-3, -5}, {-3, 5}, {0, 5}, {2, 4}};
+SDL_Point let_R[] = {{-3, 5}, {-3, -5}, {3, -5}, {3, -1}, {-3, -1}, {2, 5}};
+SDL_Point let_S[] = {{3, -5}, {-1, -5}, {-3, -2}, {-1, 0}, {1, 0}, {3, 2}, {1, 5}, {-3, 5}};
+SDL_Point let_T[] = {{0, 5}, {0, -5}, {-3, -5}, {3, -5}};
+SDL_Point let_U[] = {{-3, -5}, {-3, 2}, {-2, 4}, {0, 5}, {2, 4}, {3, 2}, {3, -5}};
+SDL_Point let_V[] = {{-3, -5}, {0, 5}, {3, -5}};
+SDL_Point let_W[] = {{-3, -5}, {-1, 5}, {0, -1}, {1, 5}, {3, -5}};
+SDL_Point let_X[] = {{-3, -5}, {3, 5}, {0, 0}, {3, -5}, {-3, 5}};
+SDL_Point let_Y[] = {{-3, -5}, {0, 0}, {3, -5}, {0, 0}, {0, 5}};
+SDL_Point let_Z[] = {{-3, -5}, {3, -5}, {-3, 5}, {3, 5}};
+
+SDL_Point sym_Underscore[] = {{-3, 5}, {3, 5}};
+
+#define font_char(Y)  {Y, sizeof Y / sizeof *Y}
+comPoints textPointComs[256] = {
+    {},{},{},{},{},{},{},{}, //7
+    {},{},{},{},{},{},{},{}, //15
+    {},{},{},{},{},{},{},{}, //23
+    {},{},{},{},{},{},{},{}, //31
+    {},{},{},{},{},{},{},{}, //39
+    {},{},{},{},{},{},{},{}, //47
+    
+    font_char(num_0),
+    font_char(num_1),
+    font_char(num_2),
+    font_char(num_3),
+    font_char(num_4),
+    font_char(num_5),
+    font_char(num_6),
+    font_char(num_7), //55
+
+    font_char(num_8),
+	font_char(num_9),{},{},{},{},{},{}, //63
+
+
+	{},    
+    font_char(let_A),
+    font_char(let_B),
+    font_char(let_C),
+    font_char(let_D),
+    font_char(let_E),
+    font_char(let_F), 
+    font_char(let_G), //71
+
+    font_char(let_H),
+    font_char(let_I),
+    font_char(let_J),
+    font_char(let_K),
+    font_char(let_L),
+    font_char(let_M),
+    font_char(let_N),
+    font_char(let_O), //79
+
+    font_char(let_P),
+    font_char(let_Q),
+    font_char(let_R),
+    font_char(let_S),
+    font_char(let_T),
+    font_char(let_U),
+    font_char(let_V),
+    font_char(let_W), //87
+
+    font_char(let_X),
+    font_char(let_Y),
+    font_char(let_Z),{},{},{},{},
+	font_char(sym_Underscore) //95
+
+    //the rest is zeros...
+};
