@@ -1,8 +1,8 @@
 #pragma once
 
+#include "math.hpp"
 #include <SDL2/SDL.h>
 #include <unordered_map>
-#include "math.hpp"
 
 /////COM LOCATION START
 struct comLocation {
@@ -18,28 +18,28 @@ void delLocationCom(int);
 
 /////COM POINTS START
 struct comPoints {
-	SDL_Point* pts;
+	SDL_Point *pts;
 	size_t len;
 };
 
 extern std::unordered_map<int, comPoints> comPoiMap;
 
-void addPointsCom(int, SDL_Point*, int);
+void addPointsCom(int, SDL_Point *, int);
 void delPointsCom(int);
 /////COM POINTS END
 
 /////COM MOVMENT START
 struct comMovement {
-	v2 vel; //spd is rotated by comLoc's
+	v2 vel; // spd is rotated by comLoc's
 	v2 acl;
-    double angVel; //does not rotate speed vectors, just rotates the loc
-    double angAcl;
+	double angVel; // does not rotate speed vectors, just rotates the loc
+	double angAcl;
 };
 
 extern std::unordered_map<int, comMovement> comMovMap;
 
 void addMovementCom(int, v2, v2, double, double);
-void addMovementCom(int, v2, v2); //TODO: DEPERCATED, remove
+void addMovementCom(int, v2, v2); // TODO: DEPERCATED, remove
 void delMovementCom(int);
 /////COM MOVEMENT END
 
@@ -60,7 +60,7 @@ struct v2Pair {
 };
 
 struct comCollider {
-	v2Pair* ptPairs;
+	v2Pair *ptPairs;
 	int len;
 	int grp;
 	bool depsOnMov;
@@ -68,7 +68,7 @@ struct comCollider {
 
 extern std::unordered_map<int, comCollider> comColMap;
 
-void addColliderCom(int, v2Pair*, int, int, bool);
+void addColliderCom(int, v2Pair *, int, int, bool);
 void delColliderCom(int);
 /////COM COLLIDER END
 
@@ -85,8 +85,8 @@ void delAsteroidCom(int);
 
 /////COM LIFETIME START
 struct comLifetime {
-    double length;
-    double elapsed;
+	double length;
+	double elapsed;
 };
 
 extern std::unordered_map<int, comLifetime> comLifMap;
@@ -98,7 +98,7 @@ void delLifetimeCom(int);
 /////COM SHOOTER START
 struct comShooter {
 	int maxBullets;
-    int curBullets;
+	int curBullets;
 };
 
 extern std::unordered_map<int, comShooter> comShrMap;
@@ -109,7 +109,7 @@ void delShooterCom(int);
 
 /////COM SHOT START
 struct comShot {
-	int owner; //entID owner
+	int owner; // entID owner
 };
 
 extern std::unordered_map<int, comShot> comShtMap;
@@ -120,24 +120,24 @@ void delShotCom(int);
 
 /////COM TEXT START
 struct comText {
-	char* str; ///null term'd
-    bool isConst;
+	char *str; /// null term'd
+	bool isConst;
 };
 
 extern std::unordered_map<int, comText> comTxtMap;
 
-void addTextCom(int, char*, bool);
+void addTextCom(int, char *, bool);
 void delTextCom(int);
 /////COM TEXT END
 
 /////COM UFO START
 struct comUFO {
-    int size;
-    double timer;
-    double nextTurn;
-    int turnState;
-    v2 lastPos;
-    int direction;
+	int size;
+	double timer;
+	double nextTurn;
+	int turnState;
+	v2 lastPos;
+	int direction;
 };
 
 #define UFO_H_SPEED (100)
@@ -160,15 +160,15 @@ void delUFOCom(int);
 
 /////COM ANIMATION START
 struct comAnimation {
-    comPoints *images;
-    int totalImages;
-    int curImage;
-    double rate; //how long it takes to advance to the next image in seconds.
-    double elapsedTime;
+	comPoints *images;
+	int totalImages;
+	int curImage;
+	double rate; // how long it takes to advance to the next image in seconds.
+	double elapsedTime;
 };
 
 extern std::unordered_map<int, comAnimation> comAniMap;
 
-void addAnimationCom(int, comPoints*, int, double);
+void addAnimationCom(int, comPoints *, int, double);
 void delAnimationCom(int);
 /////COM ANIMATION END

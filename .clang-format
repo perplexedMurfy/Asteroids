@@ -1,0 +1,14 @@
+﻿---
+AlignEscapedNewlines: Left
+AllowShortBlocksOnASingleLine: 'true'
+AllowShortCaseLabelsOnASingleLine: 'true'
+AllowShortFunctionsOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: Always
+AllowShortLoopsOnASingleLine: 'true'
+ColumnLimit: '120'
+TabWidth: '2'
+IndentWidth: '2'
+Language: Cpp
+UseTab: ForIndentation
+
+...

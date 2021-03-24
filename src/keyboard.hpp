@@ -10,5 +10,3 @@ bool keyIsReleased(int);
 bool keyIsPushed(int);
 
 extern char lastPressedKeycode;
-
-
