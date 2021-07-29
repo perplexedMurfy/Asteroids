@@ -24,17 +24,30 @@ const comPoints ThrustFrame5 = {&ThrustImage5[0], 3};
 
 const comPoints *ThrustAnimation[] = {&ThrustFrame1, &ThrustFrame2, &ThrustFrame3, &ThrustFrame4, &ThrustFrame5};
 
-// TODO: how to profile applications?
-
 SDL_Renderer *ren;
 SDL_Texture *texPreTarget;
 GameState state;
+
+char getValidChar() {
+	char result = 0;
+	
+	if (lastPressedKeycode == ' ' ||
+	    (lastPressedKeycode >= '0' && lastPressedKeycode <= '9')) {
+		result = lastPressedKeycode;
+	}
+	else if (lastPressedKeycode >= 'a' && lastPressedKeycode <= 'z') {
+		result = lastPressedKeycode & 0b11011111; //our font data only supports uppercase letters
+	}
+	
+	lastPressedKeycode = 0;
+	return result;
+}
 
 void manageState(double deltaTime) {
 	state.timer += deltaTime;
 
 	switch (state.state) {
-	case (IN_LEVEL): {
+	case IN_LEVEL: {
 		if (!state.hasAsters) {
 			state.state = INBETWEEN_LEVEL;
 			state.timer = 0;
@@ -98,8 +111,7 @@ void manageState(double deltaTime) {
 			state.timer = 0;
 			state.respawnMsgVisable = !state.respawnMsgVisable;
 			if (state.respawnMsgVisable) {
-				state.respawnMsg =
-				    makeString("PRESS THE SPACE KEY TO RESPAWN", true, v2(REN_WIDTH / 2 - 8 * (30 / 2), REN_HEIGHT / 2));
+				state.respawnMsg = makeString("PRESS THE SPACE KEY TO RESPAWN", true, v2(REN_WIDTH / 2 - 8 * (30 / 2), REN_HEIGHT / 2));
 				state.timer = 0;
 			} else {
 				delEntID(state.respawnMsg);
@@ -118,10 +130,142 @@ void manageState(double deltaTime) {
 			state.lives--;
 		}
 	} break;
+
 	case GAME_OVER: {
-		// TODO: figure out what we're gonna do...
-		comLocation temp = {v2(REN_WIDTH / 2 - 8 * (9 / 2), REN_HEIGHT / 2)};
-		renderString(&temp, "GAME OVER");
+		v2 pos = v2(REN_WIDTH/2 - 8*(9/2), REN_HEIGHT/2);
+		renderString(pos, "GAME OVER");
+		if (state.timer > 2.25) {
+			state.state = CHECK_HIGH_SCORE;
+			state.timer = 0.0f;
+		}
+	} break;
+		/*
+		  CHECK_HIGH_SCORE and ENTRY_HIGH_SCORE share a block together so they can use eachother's static variables.
+		*/
+	case CHECK_HIGH_SCORE: {
+		static int cursorPos;
+		cursorPos = 0;
+            
+		static int newEntryIndex;
+		newEntryIndex = 0;
+            
+		static char newEntryPreviewBuffer[20];
+            
+		static int newEntryPreviewLen;
+		newEntryPreviewLen = 0;
+			
+		lastPressedKeycode = 0; //stops us from capturing keycodes have been pressed in game play
+			
+		//compare cur score to highscores
+		{
+			bool newRecord = false;
+			for (newEntryIndex = 0; newEntryIndex < NUM_OF_HIGH_SCORES; newEntryIndex++) {
+				if (state.highScore[newEntryIndex].score < state.score) {
+					newRecord = true;
+					break;
+				}
+			}
+				
+			if (newRecord) {
+				//move from this slot, to the bottom down by one slot
+				for (int j = NUM_OF_HIGH_SCORES - 2; j >= newEntryIndex; j--) {
+					//TODO: replace this with memmove()?
+					memcpy(&state.highScore[j+1], &state.highScore[j], sizeof ScoreEntry);
+				}
+				//put new score value in table
+				state.highScore[newEntryIndex].score = state.score;
+				//set placeholder name
+				memcpy(state.highScore[newEntryIndex].name, "___", 4);
+					
+				//populate entry preview
+				newEntryPreviewLen = snprintf(newEntryPreviewBuffer, 20, "%3s%12d",
+				                              state.highScore[newEntryIndex].name,
+				                              state.highScore[newEntryIndex].score);
+					
+				//trans to name entry state
+				state.state = ENTRY_HIGH_SCORE;
+			}
+				
+			else {
+				state.state = MAIN_MENU;
+			}
+		}
+		break;
+			
+		case ENTRY_HIGH_SCORE:
+            
+			v2 pos = v2(REN_WIDTH/2 - 8*(14/2), (REN_HEIGHT * 12)/32);
+			renderString(pos, "NEW HIGH SCORE");
+			pos = v2(REN_WIDTH/2 - 8*(18/2), (REN_HEIGHT * 13)/32);
+			renderString(pos, "ENTER YOUR INITALS");
+			//print score entry while inputting
+            
+            
+			pos = v2(REN_WIDTH/2 - 8*(newEntryPreviewLen/2), (REN_HEIGHT * 15)/32);
+			renderString(pos, newEntryPreviewBuffer);
+            
+            
+			char input = getValidChar();
+			if (input != 0) {
+				state.highScore[newEntryIndex].name[cursorPos] = input;
+				newEntryPreviewLen = snprintf(newEntryPreviewBuffer, 20, "%3s%12d",
+				                              state.highScore[newEntryIndex].name,
+				                              state.highScore[newEntryIndex].score);
+				cursorPos++;
+				if (cursorPos == 3) {
+					//we're done inputting names!
+					//save to file, and then move on to the next game!
+					FILE* file = fopen("highscore.data", "wb");
+					fwrite(state.highScore, sizeof ScoreEntry, 10, file);
+					state.state = MAIN_MENU;
+					fclose(file);
+				}
+			}
+	} break;
+		
+	case MAIN_MENU: {
+		v2 pos = v2(REN_WIDTH/2 - 8*(9/2), (REN_HEIGHT * 7)/8);
+		renderString(pos, "ASTEROIDS");
+            
+		pos = v2(REN_WIDTH/2 - 8*(24/2), (REN_HEIGHT * 2)/8);
+		renderString(pos, "PRESS SPACE TO PLAY GAME");
+            
+		//TODO: we don't have to regenerate this every single frame...
+		pos = v2(REN_WIDTH/2 - 8*(13/2), (REN_HEIGHT * 6)/16);
+		renderString(pos, "TOP 10 SCORES");
+		char buffer[20];
+		for (int i = 0; i < NUM_OF_HIGH_SCORES; i++) {
+			if (state.highScore[i].score == 0) {
+				break;
+			}
+			int len = snprintf(buffer, 20, "%3s%12d", state.highScore[i].name,
+			                   state.highScore[i].score);
+                
+			pos = v2(REN_WIDTH/2 - 8*(len/2), (REN_HEIGHT * (14+i))/32);
+			renderString(pos, buffer);
+		}
+			
+		if (keyIsPushed(SDL_SCANCODE_SPACE)) {
+			state.state = INBETWEEN_LEVEL;
+			state.playerEntID = makePlayer();
+			state.timer = 0;
+			state.level = -1;
+			state.score = 0;
+			state.lives = 3;
+                
+			for (std::vector<int>::iterator iter = entList.begin(); iter != entList.end();) {
+				if (getAllComs(*iter).ast) {
+					iter = delEntID(*iter);
+				}
+				else {
+					iter++;
+				}
+			}
+		}
+	} break;
+	case PAUSED: {
+		v2 pos = v2(REN_WIDTH/2 - 8*(6/2), (REN_HEIGHT * 1)/8);
+		renderString(pos, "PAUSED");
 	} break;
 	}
 
@@ -158,18 +302,37 @@ void test() {
 
 int main(int argc, char *argv[]) {
 	test();
-
+	initRNG();
 	SDL_Init(SDL_INIT_VIDEO);
 
-	//        state,           playerid,     timer, speedmod, level, score, lives
-	state = {INBETWEEN_LEVEL, makePlayer(), 0.0, 0, -1, 0, 3};
+	
+	state = {};
+	state.state = MAIN_MENU;
+	state.playerEntID = -1;
 
 	state.windims.w = REN_WIDTH;
 	state.windims.h = REN_HEIGHT;
 	state.isFullscreen = false;
 
-	SDL_Window *win = SDL_CreateWindow("Asteroids", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, state.windims.w,
-	                                   state.windims.h, SDL_WINDOW_SHOWN);
+	{ // Load highscores from file
+		FILE *hsFile = fopen("highscore.data", "rb");
+		if (hsFile) {
+			fread(state.highScore, sizeof(ScoreEntry), NUM_OF_HIGH_SCORES, hsFile);
+			fclose(hsFile);
+		}
+		else { // there's no highscore file! let's generate some believable scores
+			for (int index = NUM_OF_HIGH_SCORES; index >= 0; index--) {
+				int difference = index - NUM_OF_HIGH_SCORES;
+				state.highScore[index].score = difference * 140 + getRandInt(0, 140/5) * 5;
+				state.highScore[index].name[0] = '_';
+				state.highScore[index].name[1] = '_';
+				state.highScore[index].name[2] = '_';
+				state.highScore[index].name[3] = 0;
+			}
+		}
+	}
+
+	SDL_Window *win = SDL_CreateWindow("Asteroids", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, state.windims.w, state.windims.h, SDL_WINDOW_SHOWN);
 	ren = SDL_CreateRenderer(win, 0, SDL_RENDERER_ACCELERATED);
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 
@@ -192,8 +355,6 @@ int main(int argc, char *argv[]) {
 
 	texPreTarget = SDL_CreateTexture(ren, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_TARGET, REN_WIDTH, REN_HEIGHT);
 
-	initRNG();
-
 	bool rendermode = true;
 	bool quit = false;
 	bool pause = false;
@@ -211,6 +372,10 @@ int main(int argc, char *argv[]) {
 				switch (event.type) {
 				case SDL_KEYUP:
 				case SDL_KEYDOWN: keyboardHandler(event); break;
+
+				case SDL_WINDOWEVENT: {
+					if (event.window.event == SDL_WINDOWEVENT_CLOSE) { quit = true; }
+				} break;
 				default: break;
 				}
 			}
@@ -269,6 +434,20 @@ int main(int argc, char *argv[]) {
 					v2 pos = comLocMap.at(state.playerEntID).pos + (rotMat * v2(8, 0));
 					v2 vel = rotMat * v2(400, 0);
 					makeBullet(pos, vel, comColMap.at(state.playerEntID).grp, state.playerEntID);
+				}
+
+				if (keyIsPushed(SDL_SCANCODE_P)) { // pause
+					static int stateToRestore = -1;
+					if (!pause) {
+						pause = true;
+						stateToRestore = state.state;
+						state.state = PAUSED;
+					}
+					else {
+						pause = false;
+						state.state = stateToRestore;
+						stateToRestore = -1;
+					}
 				}
 
 				if (keyIsPushed(SDL_SCANCODE_SPACE)) { // hyperspace
@@ -335,9 +514,11 @@ int main(int argc, char *argv[]) {
 			if (keyIsPushed(SDL_SCANCODE_F4)) { // full screen, streched
 				SDL_SetWindowFullscreen(win, SDL_WINDOW_FULLSCREEN_DESKTOP);
 				state.isFullscreen = true;
-				// center view
-				// change view to screen dimentions
+				SDL_DisplayMode mode;
+				SDL_GetWindowDisplayMode(win, &mode);
+				state.windims = {0, 0, mode.w, mode.h};
 			}
+
 #ifdef DEBUG
 			if (keyIsPushed(SDL_SCANCODE_R)) {
 				rendermode = rendermode ? false : true;
@@ -381,7 +562,6 @@ int main(int argc, char *argv[]) {
 					}
 				}
 			}
-			if (keyIsPressed(SDL_SCANCODE_P)) { pause = pause ? false : true; }
 #endif
 
 			SDL_SetRenderTarget(ren, texPreTarget);
@@ -394,15 +574,15 @@ int main(int argc, char *argv[]) {
 
 			// draw score
 			{
-				comLocation temp = {v2(2, 2), 0}; // scorePos
+				v2 pos = v2(2, 2); // scorePos
 				char buffer[100];
 				sprintf(buffer, "SCORE %d", state.score);
-				renderString(&temp, buffer);
+				renderString(pos, buffer);
 #ifdef DEBUG
 				// draw frame time
 				sprintf(buffer, "%f", deltaTime);
-				temp.pos.y += 25;
-				renderString(&temp, buffer);
+				pos.y += 25;
+				renderString(pos, buffer);
 #endif
 			}
 
@@ -469,6 +649,8 @@ int main(int argc, char *argv[]) {
 
 			// scale preTexTarget to the window size
 			SDL_SetRenderTarget(ren, 0);
+			SDL_SetRenderDrawColor(ren, 0x33, 0x33, 0x33, 0xff);
+			SDL_RenderClear(ren);
 			SDL_Rect src = {0, 0, REN_WIDTH, REN_HEIGHT};
 			SDL_RenderCopy(ren, texPreTarget, &src, &state.windims);
 
@@ -481,6 +663,5 @@ int main(int argc, char *argv[]) {
 	SDL_DestroyRenderer(ren);
 	SDL_DestroyWindow(win);
 	SDL_Quit();
-	// Lets see about using the entity componenty structure, it might be fun!
 	return 0;
 }

@@ -8,7 +8,8 @@ void renderRectangle(const comLocation *, const comRectangle *);
 
 void renderColliders(const comLocation *, const comCollider *);
 
-void renderString(const comLocation *, const char *);
+
+void renderString(v2, const char *);
 void renderString(const comLocation *, const comText *);
 
 void advanceAnimation(comAnimation *, const comLocation *, double);

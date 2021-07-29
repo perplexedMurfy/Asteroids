@@ -57,26 +57,24 @@ void renderColliders(const comLocation *loc, const comCollider *col) {
 	}
 }
 
-void renderString(const comLocation *loc, const char *txt) {
-	if (!loc || !txt) { return; }
-
-	comLocation temp = *loc;
+void renderString(v2 pos, const char *txt) {
 	for (int i = 0; txt[i] != 0; i++) {
 		// Draw character data.
-		temp.pos += v2(3, 5); // offset, accounts for center of character
-		if (textPointComs[txt[i]].len != 0) renderPoints((comPoints *)&textPointComs[txt[i]], &temp);
-		temp.pos -= v2(3, 5);
+		pos += v2(3, 5); // offset, accounts for center of character
+		if (textPointComs[txt[i]].len != 0) {
+			const comPoints * const charPoints = &textPointComs[txt[i]];
+			renderPoints(charPoints->pts, charPoints->len, pos, 0);
+		}
+		pos -= v2(3, 5);
 		// Add inter-character spacing
-		temp.pos.x += 8;
+		pos.x += 8;
 		// Next Character!
-	}
+	}	
 }
 
 void renderString(const comLocation *loc, const comText *txt) {
-	if (!txt) {
-		return; // we check *loc and txt->str later.
-	}
-	renderString(loc, txt->str);
+	if (!txt || !loc) { return; }
+	renderString(loc->pos, txt->str);
 }
 
 /**

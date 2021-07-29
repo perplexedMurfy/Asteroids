@@ -10,11 +10,14 @@ set libs=User32.lib Shell32.lib opengl32.lib Gdi32.lib SDL2main.lib SDL2.lib
 
 if "%1"=="debug" (
     set copts=-IC:\dev\include\ -Od -Zi -MDd -DDEBUG
-    set lopts=-ENTRY:mainCRTStartup -OUT:..\Asteroids.exe -LIBPATH:C:\dev\lib\win64\ -SUBSYSTEM:CONSOLE
+    set lopts=-ENTRY:mainCRTStartup -OUT:..\Asteroids.exe -LIBPATH:C:\dev\lib\win64\ -SUBSYSTEM:CONSOLE -DEBUG
 ) else (
     set copts=-IC:\dev\include\ -O2 -MT -WX 
     set lopts=-ENTRY:mainCRTStartup -OUT:..\Asteroids.exe -LIBPATH:C:\dev\lib\win64\ -SUBSYSTEM:WINDOWS
 )
+
+echo cl %copts% %code% -Fo..\bin\obj\ -c -EHsc
+echo link %lopts% %objs% %libs%
 
 pushd src
 cl %copts% %code% -Fo..\bin\obj\ -c -EHsc
